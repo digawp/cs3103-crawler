@@ -1,6 +1,9 @@
 // @author: Diga Widyaprana
 // @matric: A0114171W
 
+#ifndef CRAWLER_H_
+#define CRAWLER_H_
+
 // Includes for sockets
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -34,3 +37,4 @@ private:
 
     std::vector<std::string> extract_a_tag(tree<htmlcxx::HTML::Node>& dom);
 };
+#endif // CRAWLER_H_

@@ -1,6 +1,9 @@
 // @author: Diga Widyaprana
 // @matric: A0114171W
 
+#ifndef STORAGE_H_
+#define STORAGE_H_
+
 #include <deque>
 #include <mutex>
 #include <unordered_map>
@@ -31,3 +34,4 @@ public:
 
     struct Url get_next_url();
 };
+#endif // STORAGE_H_
