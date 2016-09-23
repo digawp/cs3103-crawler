@@ -30,32 +30,10 @@ void print_request_DEBUG(const std::string content) {
     std::cout << "============================" << std::endl << std::endl;
 }
 
-void print_response_header_DEBUG(std::stringstream& ss) {
-    std::string line;
-    std::cout << "Response: " << std::endl;
-
-    // Print response header
-    while(true) {
-        std::getline(ss, line);
-        if (line.size() < 2)
-        {
-            std::cout << line.size() << std::endl;
-            std::cout << line << std::endl;
-            break;
-        }
-        std::cout << line << std::endl;
-    }
-}
-
-void dump_html_DEBUG(std::stringstream& ss) {
+void dump_html_DEBUG(const std::string& ss) {
     std::ofstream myfile;
     myfile.open ("output/dump.html");
-    for (std::string line; std::getline(ss, line); ) {
-        if (line.size() < 2) {
-            continue;
-        }
-        myfile << line << std::endl;
-    }
+    myfile << ss;
     myfile.close();
 }
 
@@ -129,6 +107,34 @@ std::string construct_req_header(const std::string host, const std::string path)
     return oss.str();
 }
 
+typedef struct {
+    std::string header;
+    std::string body;
+} HttpResponse;
+
+HttpResponse parse_response(std::stringstream& ss) {
+    HttpResponse res;
+    std::string header;
+    std::string body;
+
+    for (std::string line; std::getline(ss, line); ) {
+        if (line.size() < 2) {
+            break;
+        }
+        header += line + "\n";
+    }
+    res.header = header;
+
+    for (std::string line; std::getline(ss, line); ) {
+        if (line.size() < 2) {
+            continue;
+        }
+        body += line + "\n";
+    }
+    res.body = body;
+    return res;
+}
+
 int main(int argc, char const *argv[])
 {
     int socket_desc;
@@ -167,22 +173,20 @@ int main(int argc, char const *argv[])
         ss.write(buffer, bytes_read);
     }
 
-    print_response_header_DEBUG(ss);
-
     // In case the response terminated early
     if (bytes_read == -1) {
         perror("recv");
         return 1;
     }
 
-    dump_response_DEBUG(ss);
-    dump_html_DEBUG(ss);
+    HttpResponse response = parse_response(ss);
+    std::cout << response.header;
 
-    // TODO: extract out the header, just pass the response body to parser
-    std::string html = ss.str();
+    dump_response_DEBUG(ss);
+    dump_html_DEBUG(response.body);
 
     HTML::ParserDom parser;
-    tree<HTML::Node> dom = parser.parseTree(html);
+    tree<HTML::Node> dom = parser.parseTree(response.body);
 
     std::ofstream dom_file;
     dom_file.open("output/dom.html");
