@@ -14,7 +14,9 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <sstream>
+#include <vector>
 
 // HTML parser
 #include <htmlcxx/html/ParserDom.h>
@@ -112,6 +114,12 @@ typedef struct {
     std::string body;
 } HttpResponse;
 
+typedef struct {
+    std::string base;
+    std::string path;
+    std::string full() { return base + path; };
+} Url;
+
 HttpResponse parse_response(std::stringstream& ss) {
     HttpResponse res;
     std::string header;
@@ -135,8 +143,20 @@ HttpResponse parse_response(std::stringstream& ss) {
     return res;
 }
 
-int main(int argc, char const *argv[])
-{
+std::vector<std::string> extract_a_tag(tree<HTML::Node>& dom) {
+    std::vector<std::string> links;
+    tree<HTML::Node>::iterator it = dom.begin();
+    tree<HTML::Node>::iterator end = dom.end();
+    for (; it != end; ++it) {
+        if (it->tagName() == "a" || it->tagName() == "A") {
+            it->parseAttributes();
+            links.push_back(it->attribute("href").second);
+        }
+    }
+    return links;
+}
+
+int main(int argc, char const *argv[]) {
     int socket_desc;
     struct addrinfo* addrinfo_res;
     const char* url = "www.google.com.sg";
@@ -194,6 +214,26 @@ int main(int argc, char const *argv[])
     dom_file.close();
 
     dump_links_DEBUG(dom);
+
+    std::vector<std::string> links = extract_a_tag(dom);
+
+    for (auto link = links.begin(); link != links.end(); ++link) {
+        Url url;
+        std::regex regexp("//.+?[^/:](?=[?/]|$)");
+        std::smatch match;
+        std::regex_search(*link, match, regexp);
+        if (match.empty()) {
+            std::cout << "Relative url" << std::endl;
+            continue;
+        }
+        url.base = match.str().substr(2);
+        int offset = link->find(url.base) + url.base.size();
+        url.path = link->substr(offset);
+        if (url.path.empty()) {
+            url.path = "/";
+        }
+        std::cout << url.base << "\t" << url.path << std::endl;
+    }
 
     close(socket_desc);
     return 0;
