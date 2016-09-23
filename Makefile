@@ -1,8 +1,8 @@
 default: build
 
-build: main.cpp crawler.cpp
+build: main.cpp crawler.cpp storage.cpp
 	mkdir -p build
-	g++ -std=c++11 main.cpp crawler.cpp -o build/crawl -lhtmlcxx
+	g++ -std=c++11 main.cpp crawler.cpp storage.cpp -o build/crawl -lhtmlcxx
 
 run: build/crawl
 	./build/crawl $(ARGS)
