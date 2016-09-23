@@ -15,6 +15,8 @@
 #include <sstream>
 #include <vector>
 
+#include "storage.h"
+
 // HTML parser
 #include <htmlcxx/html/ParserDom.h>
 
@@ -25,8 +27,11 @@ private:
         std::string body;
     } HttpResponse;
 
+    Storage& storage;
+
 public:
-    void run(const std::string& starting_url);
+    Crawler(Storage& store);
+    void run();
 
 private:
     bool connect(struct addrinfo* ai_results, int* socket_desc);

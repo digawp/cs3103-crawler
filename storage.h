@@ -30,6 +30,7 @@ public:
 
     void report_res_time(const std::string& url, const double time);
 
+    void add_url(Url urls);
     void add_urls(std::vector<struct Url>& urls);
 
     struct Url get_next_url();

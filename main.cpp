@@ -17,7 +17,9 @@ int main(int argc, char const *argv[])
 
     Storage store(urls);
 
-    Crawler crawler;
-    crawler.run(url);
+    Crawler crawler(store);
+    crawler.run();
+
+    store.dump_log();
     return 0;
 }

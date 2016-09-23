@@ -15,14 +15,16 @@ namespace HTML = htmlcxx::HTML;
 
 typedef struct Url Url;
 
-void Crawler::run(const std::string& starting_url) {
-    std::string base_url = starting_url;
-    std::string path = "/";
+Crawler::Crawler(Storage& store) : storage(store) {}
+
+void Crawler::run() {
+    Url url = storage.get_next_url();
+
     while (true) {
         int socket_desc;
         struct addrinfo* addrinfo_res;
 
-        int addrinfo_status = getaddrinfo(base_url.c_str(), "http", NULL, &addrinfo_res);
+        int addrinfo_status = getaddrinfo(url.base.c_str(), "http", NULL, &addrinfo_res);
         if (addrinfo_status != 0) {
             perror(gai_strerror(addrinfo_status));
             return;
@@ -35,7 +37,7 @@ void Crawler::run(const std::string& starting_url) {
         }
         freeaddrinfo(addrinfo_res);
 
-        std::string request = construct_req_header(base_url, path);
+        std::string request = construct_req_header(url.base, url.path);
         send(socket_desc, request.c_str(), request.size(), 0);
 
         auto start = std::chrono::steady_clock::now();
@@ -62,25 +64,42 @@ void Crawler::run(const std::string& starting_url) {
         std::vector<std::string> links = extract_a_tag(dom);
 
         for (auto link = links.begin(); link != links.end(); ++link) {
-            Url url;
+            Url new_url;
             std::regex regexp("//.+?[^/:](?=[?/]|$)");
             std::smatch match;
             std::regex_search(*link, match, regexp);
+
+
             if (match.empty()) {
-                std::cout << "Relative url" << std::endl;
+                // Relative URL
+                new_url.base = url.base;
+                new_url.path = *link;
                 continue;
+            } else {
+                // Full URL
+                // First 2 characters are "//"
+                new_url.base = match.str().substr(2);
+
+                // Extract path from URL
+                int offset = link->find(new_url.base) + new_url.base.size();
+                new_url.path = link->substr(offset);
+
+                if (new_url.path.empty()) {
+                    new_url.path = "/";
+                }
             }
-            url.base = match.str().substr(2);
-            int offset = link->find(url.base) + url.base.size();
-            url.path = link->substr(offset);
-            if (url.path.empty()) {
-                url.path = "/";
-            }
-            std::cout << url.base << "\t" << url.path << std::endl;
+            storage.add_url(new_url);
         }
-        std::chrono::microseconds elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-        std::cout << elapsed.count()/1000.0 << std::endl;
+
+        std::chrono::microseconds duration =
+            std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        double elapsed = duration.count()/1000.0;
+        std::cout << elapsed << std::endl;
+        storage.report_res_time(url.full(), elapsed);
+
         close(socket_desc);
+
+        // TODO remove this to run indefinitely
         break;
     } // end of while
 }
