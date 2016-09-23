@@ -16,17 +16,11 @@
 #include <htmlcxx/html/ParserDom.h>
 
 class Crawler {
-
+private:
     typedef struct {
         std::string header;
         std::string body;
     } HttpResponse;
-
-    typedef struct {
-        std::string base;
-        std::string path;
-        std::string full() { return base + path; };
-    } Url;
 
 public:
     void run(const std::string& starting_url);

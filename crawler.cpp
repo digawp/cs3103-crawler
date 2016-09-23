@@ -5,11 +5,14 @@
 #include <regex>
 
 #include "crawler.h"
+#include "structs.h"
 
 // TODO: Temporary, remove on release!
 #include <iostream>
 
 namespace HTML = htmlcxx::HTML;
+
+typedef struct Url Url;
 
 void Crawler::run(const std::string& starting_url) {
     while (true) {
