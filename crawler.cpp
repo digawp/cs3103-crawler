@@ -1,6 +1,7 @@
 // @author: Diga Widyaprana
 // @matric: A0114171W
 
+#include <chrono>
 #include <cstdio>
 #include <regex>
 
@@ -15,11 +16,13 @@ namespace HTML = htmlcxx::HTML;
 typedef struct Url Url;
 
 void Crawler::run(const std::string& starting_url) {
+    std::string base_url = starting_url;
+    std::string path = "/";
     while (true) {
         int socket_desc;
         struct addrinfo* addrinfo_res;
 
-        int addrinfo_status = getaddrinfo(starting_url.c_str(), "http", NULL, &addrinfo_res);
+        int addrinfo_status = getaddrinfo(base_url.c_str(), "http", NULL, &addrinfo_res);
         if (addrinfo_status != 0) {
             perror(gai_strerror(addrinfo_status));
             return;
@@ -32,8 +35,12 @@ void Crawler::run(const std::string& starting_url) {
         }
         freeaddrinfo(addrinfo_res);
 
-        std::string request = construct_req_header(starting_url, "/");
+        std::string request = construct_req_header(base_url, path);
         send(socket_desc, request.c_str(), request.size(), 0);
+
+        auto start = std::chrono::steady_clock::now();
+        recv(socket_desc, NULL, 0, MSG_PEEK);
+        auto end = std::chrono::steady_clock::now();
 
         char buffer[1024];
         int bytes_read;
@@ -71,6 +78,8 @@ void Crawler::run(const std::string& starting_url) {
             }
             std::cout << url.base << "\t" << url.path << std::endl;
         }
+        std::chrono::microseconds elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        std::cout << elapsed.count()/1000.0 << std::endl;
         close(socket_desc);
         break;
     } // end of while
