@@ -1,15 +1,23 @@
 // @author: Diga Widyaprana
 // @matric: A0114171W
+
+// Includes for sockets
 #include <arpa/inet.h>
-#include <cstdio>
-#include <cstring>
-#include <iostream>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <sstream>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <cctype>
+#include <cstdio>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+
+// HTML parser
+#include <htmlcxx/html/ParserDom.h>
 
 bool connect(struct addrinfo* ai_results, int* socket_desc) {
     struct addrinfo* rp;
