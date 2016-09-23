@@ -1,16 +1,17 @@
 // @author: Diga Widyaprana
 // @matric: A0114171W
 
+#include <fstream>
 #include <vector>
 
 #include "storage.h"
 
 typedef struct Url Url;
 
-Storage::Storage(std::vector<std::string>& urls) {
+Storage::Storage(std::vector<std::string>& urlstrs) {
     std::lock_guard<std::mutex> lock1(q_lock);
     std::lock_guard<std::mutex> lock2(blacklist_lock);
-    for (auto url = urls.begin(); url != urls.end(); ++url) {
+    for (auto url = urlstrs.begin(); url != urlstrs.end(); ++url) {
         url_blacklist.insert(*url);
         Url url_struct = { .base = *url, .path = "/" };
         to_visit_q.push_back(url_struct);
@@ -40,4 +41,15 @@ Url Storage::get_next_url() {
     Url next = to_visit_q.front();
     to_visit_q.pop_front();
     return next;
+}
+
+void Storage::dump_log() {
+    std::ofstream fs;
+    fs.open("output/url_log.txt");
+    for (auto log_entry = url_log.begin(); log_entry != url_log.end();
+            ++log_entry) {
+        double avg_time = log_entry->second.first / log_entry->second.second;
+        fs << log_entry->first << "\t\t" << avg_time << std::endl;
+    }
+    fs.close();
 }
