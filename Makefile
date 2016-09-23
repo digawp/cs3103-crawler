@@ -5,7 +5,7 @@ build: main.cpp crawler.cpp storage.cpp
 	g++ -std=c++11 main.cpp crawler.cpp storage.cpp -o build/crawl -lhtmlcxx
 
 run: build/crawl
-	./build/crawl $(ARGS)
+	./build/crawl $(SEED)
 
 crawler: crawler.cpp crawler.h
 	g++ -std=c++11 -c crawler.cpp -o build/crawler.o
@@ -19,7 +19,7 @@ mockbuild: mockmain.cpp
 
 mockrun: build/mock
 	mkdir -p output
-	./build/mock $(ARGS)
+	./build/mock $(URL)
 
 clean:
 	rm build/*

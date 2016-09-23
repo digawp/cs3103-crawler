@@ -31,6 +31,15 @@ Make sure you have all the prerequisites above before running the following.
 
 ## Running
 
-    make run [ARGS=<url>]
+    make run [SEED=<path/to/seed>]
 
-Where `url` is any web URL of your choice.
+If left empty, the default `seed` file will be used.
+
+## Testing a seed URL
+
+Before putting a URL into the seed file, you can test if it will make the web crawler stuck (i.e. 404, 301)
+
+    make mockbuild
+    make mockrun [URL=<url>]
+
+If left empty, url wi default to www.comp.nus.edu.sg.

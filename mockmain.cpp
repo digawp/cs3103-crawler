@@ -179,7 +179,7 @@ int main(int argc, char const *argv[]) {
     }
     freeaddrinfo(addrinfo_res);
 
-    std::string request = construct_req_header(url, "/?gfe_rd=cr&ei=y8LkV6P9MpDI8Ae83JNo");
+    std::string request = construct_req_header(url, "/");
 
     print_request_DEBUG(request);
 
