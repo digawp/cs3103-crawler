@@ -12,7 +12,7 @@
 Storage store;
 
 void sigint_handler(int signum) {
-    std::cout << "Sigint " << signum << " received." << std::endl;
+    std::cout << "\nSigint " << signum << " received." << std::endl;
     std::cout << "Dump log to output/url_log.txt." << std::endl;
     store.dump_log();
     exit(signum);
@@ -23,9 +23,9 @@ void create_and_run_crawler(Storage& store) {
     crawler.run();
 }
 
-int main(int argc, char const *argv[])
-{
-    std::signal(SIGINT, sigint_handler); // register ctrl-c interrupt handler
+int main(int argc, char const *argv[]) {
+    // register interrupt handler (eg ctrl-c)
+    std::signal(SIGINT, sigint_handler);
     std::string seed = "seed";
     if (argc > 1) {
         seed = argv[1];
