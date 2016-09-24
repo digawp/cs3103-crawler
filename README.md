@@ -47,4 +47,4 @@ Before putting a URL into the seed file, you can test if it will make the web cr
     make mockbuild
     make mockrun [URL=<url>]
 
-If left empty, url wi default to www.comp.nus.edu.sg.
+If left empty, url will default to www.comp.nus.edu.sg.
