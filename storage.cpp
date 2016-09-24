@@ -10,15 +10,18 @@ typedef struct Url Url;
 
 void Storage::report_res_time(const std::string& base_url, const double time) {
     std::lock_guard<std::mutex> lock(url_log_lock);
-    // If url_log[base_url] does not exist, one will be created
-    url_log[base_url].first += time;
-    url_log[base_url].second++;
+    url_log[base_url].time += time;
+    url_log[base_url].visited++;
 }
 
 void Storage::add_url(Url url){
     std::lock_guard<std::mutex> lock1(q_lock);
     std::lock_guard<std::mutex> lock2(blacklist_lock);
-    if (url_blacklist.find(url.full()) == url_blacklist.end()) {
+    if (url_blacklist.find(url.full()) == url_blacklist.end() &&
+            url_log[url.base].queued < 20) {
+        // Each base url will only be visited 20 times (TODO: may need to be
+        // adjusted)
+        url_log[url.base].queued++;
         url_blacklist.insert(url.full());
         to_visit_q.push_back(url);
     }
@@ -52,7 +55,11 @@ void Storage::dump_log() {
     fs.open("url_log.txt");
     for (auto log_entry = url_log.begin(); log_entry != url_log.end();
             ++log_entry) {
-        double avg_time = log_entry->second.first / log_entry->second.second;
+        UrlLogVals log_val = log_entry->second;
+        if (log_val.visited == 0) {
+            continue;
+        }
+        double avg_time = log_val.time / static_cast<double>(log_val.visited);
         fs << log_entry->first << "\t\t" << avg_time << " ms" << std::endl;
     }
     fs.close();

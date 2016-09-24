@@ -13,8 +13,12 @@
 
 class Storage {
 private:
-    typedef std::pair<double, int> UrlLogEntry;
-    typedef std::unordered_map<std::string, UrlLogEntry> UrlLog;
+    typedef struct {
+        double time = 0;
+        int queued = 0;
+        int visited = 0;
+    } UrlLogVals;
+    typedef std::unordered_map<std::string, UrlLogVals> UrlLog;
     typedef std::unordered_set<std::string> BlackList;
 
     std::mutex url_log_lock;
