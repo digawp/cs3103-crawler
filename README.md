@@ -14,14 +14,19 @@ To build and install:
 
 2. `./configure && make && [sudo] make install`
 
-3. (May not be necessary) `sudo ldconfig`
+3. (May not be necessary) export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 
-Any problem with htmlcxx installations: go to their INSTALL file (in the package) or google it.
+4. (May not be necessary) `sudo ldconfig`
 
+Any problem with htmlcxx installations: go to their INSTALL file (in the package) or google it. Note that the problem usually surface only during program compilation and/or runtime.
 
 ### Linux
 
 The program was built on Ubuntu 15.04, and tested (ran) on [to be filled in]. Not guaranteed to work on any other platform. Definitely won't work on non-Unix environments as the socket codes are Unix(Linux)-specific.
+
+### Regex
+
+The program uses C++11 regex standard library. Make sure your C++ compiler supports it (for `gcc`, minimum version is 4.9).
 
 ## Building
 
