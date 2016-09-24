@@ -24,5 +24,6 @@ mockrun: build/mock
 clean:
 	rm build/*
 	rm output/*
+	rm url_log.txt
 
 .PHONY: build

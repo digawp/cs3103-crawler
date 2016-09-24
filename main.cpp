@@ -13,7 +13,7 @@ Storage store;
 
 void sigint_handler(int signum) {
     std::cout << "\nSigint " << signum << " received." << std::endl;
-    std::cout << "Dump log to output/url_log.txt." << std::endl;
+    std::cout << "Dump log to url_log.txt." << std::endl;
     store.dump_log();
     exit(signum);
 }

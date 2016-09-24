@@ -49,7 +49,7 @@ Url Storage::get_next_url() {
 void Storage::dump_log() {
     std::lock_guard<std::mutex> lock(url_log_lock);
     std::ofstream fs;
-    fs.open("output/url_log.txt");
+    fs.open("url_log.txt");
     for (auto log_entry = url_log.begin(); log_entry != url_log.end();
             ++log_entry) {
         double avg_time = log_entry->second.first / log_entry->second.second;
