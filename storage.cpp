@@ -8,16 +8,6 @@
 
 typedef struct Url Url;
 
-Storage::Storage(std::vector<std::string>& urlstrs) {
-    std::lock_guard<std::mutex> lock1(q_lock);
-    std::lock_guard<std::mutex> lock2(blacklist_lock);
-    for (auto url = urlstrs.begin(); url != urlstrs.end(); ++url) {
-        url_blacklist.insert(*url);
-        Url url_struct = { .base = *url, .path = "/" };
-        to_visit_q.push_back(url_struct);
-    }
-}
-
 void Storage::report_res_time(const std::string& base_url, const double time) {
     std::lock_guard<std::mutex> lock(url_log_lock);
     // If url_log[base_url] does not exist, one will be created
@@ -37,6 +27,16 @@ void Storage::add_url(Url url){
 void Storage::add_urls(std::vector<Url>& urls){
     for (auto url = urls.begin(); url != urls.end(); ++url) {
         add_url(*url);
+    }
+}
+
+void Storage::add_urls(std::vector<std::string>& urlstrs) {
+    std::lock_guard<std::mutex> lock1(q_lock);
+    std::lock_guard<std::mutex> lock2(blacklist_lock);
+    for (auto url = urlstrs.begin(); url != urlstrs.end(); ++url) {
+        url_blacklist.insert(*url);
+        Url url_struct = { .base = *url, .path = "/" };
+        to_visit_q.push_back(url_struct);
     }
 }
 

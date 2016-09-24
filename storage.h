@@ -26,12 +26,11 @@ private:
     std::deque<struct Url> to_visit_q;
 
 public:
-    Storage(std::vector<std::string>& urlstrs);
-
     void report_res_time(const std::string& url, const double time);
 
     void add_url(Url urls);
     void add_urls(std::vector<struct Url>& urls);
+    void add_urls(std::vector<std::string>& urlstrs);
 
     struct Url get_next_url();
 
