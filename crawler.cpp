@@ -8,9 +8,6 @@
 
 #include "crawler.h"
 
-// TODO: Temporary, remove on release!
-#include <iostream>
-
 namespace HTML = htmlcxx::HTML;
 
 typedef struct Url Url;
@@ -70,7 +67,6 @@ void Crawler::run() {
         std::chrono::microseconds duration =
             std::chrono::duration_cast<std::chrono::microseconds>(end - start);
         double elapsed = duration.count()/1000.0;
-        std::cout << url.full() << "\t" << elapsed << std::endl;
         storage.report_res_time(url.base, elapsed);
 
         close(socket_desc);
