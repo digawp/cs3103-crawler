@@ -73,11 +73,10 @@ void Crawler::run() {
         std::cout << url.full() << "\t" << elapsed << std::endl;
         storage.report_res_time(url.base, elapsed);
 
-        if (elapsed < 200.0) {
-            // Rate limiter
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        }
         close(socket_desc);
+        // Rate limiter, randomize between 1 to 10 seconds
+        std::this_thread::sleep_for(
+            std::chrono::seconds(1 + (std::rand() % 10)));
     } // end of while
 }
 
