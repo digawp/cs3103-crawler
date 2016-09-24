@@ -23,7 +23,8 @@ void Crawler::run() {
         int socket_desc;
         struct addrinfo* addrinfo_res;
 
-        int addrinfo_status = getaddrinfo(url.base.c_str(), "http", NULL, &addrinfo_res);
+        int addrinfo_status =
+            getaddrinfo(url.base.c_str(), "http", NULL, &addrinfo_res);
         if (addrinfo_status != 0) {
             perror(gai_strerror(addrinfo_status));
             continue;
@@ -111,7 +112,8 @@ bool Crawler::connect(struct addrinfo* ai_results, int* socket_desc) {
     return true;
 }
 
-std::string Crawler::construct_req_header(const std::string& host, const std::string& path) {
+std::string Crawler::construct_req_header(
+        const std::string& host, const std::string& path) {
     std::ostringstream oss;
     oss << "GET " << path << " HTTP/1.0\r\n";
     oss << "Host: " << host << "\r\n";
