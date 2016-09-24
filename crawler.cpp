@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cstdio>
 #include <regex>
+#include <thread>
 
 #include "crawler.h"
 
@@ -71,10 +72,11 @@ void Crawler::run() {
         std::cout << url.full() << "\t" << elapsed << std::endl;
         storage.report_res_time(url.base, elapsed);
 
+        if (elapsed < 200.0) {
+            // Rate limiter
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
         close(socket_desc);
-
-        // TODO remove this to run indefinitely
-        // break;
     } // end of while
 }
 
