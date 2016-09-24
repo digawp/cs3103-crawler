@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "storage.h"
+#include "structs.h"
 
 // HTML parser
 #include <htmlcxx/html/ParserDom.h>
@@ -41,5 +42,7 @@ private:
     HttpResponse parse_response(std::stringstream& ss);
 
     std::vector<std::string> extract_a_tag(tree<htmlcxx::HTML::Node>& dom);
+
+    struct Url parse_url_string(std::string urlstr, const std::string& current_base_url);
 };
 #endif // CRAWLER_H_

@@ -6,7 +6,6 @@
 #include <regex>
 
 #include "crawler.h"
-#include "structs.h"
 
 // TODO: Temporary, remove on release!
 #include <iostream>
@@ -64,31 +63,7 @@ void Crawler::run() {
         std::vector<std::string> links = extract_a_tag(dom);
 
         for (auto link = links.begin(); link != links.end(); ++link) {
-            Url new_url;
-            std::regex regexp("//.+?[^/:](?=[?/]|$)");
-            std::smatch match;
-            std::regex_search(*link, match, regexp);
-
-
-            if (match.empty()) {
-                // Relative URL
-                new_url.base = url.base;
-                new_url.path = *link;
-                continue;
-            } else {
-                // Full URL
-                // First 2 characters are "//"
-                new_url.base = match.str().substr(2);
-
-                // Extract path from URL
-                int offset = link->find(new_url.base) + new_url.base.size();
-                new_url.path = link->substr(offset);
-
-                if (new_url.path.empty()) {
-                    new_url.path = "/";
-                }
-            }
-            storage.add_url(new_url);
+            storage.add_url(parse_url_string(*link, url.base));
         }
 
         std::chrono::microseconds duration =
@@ -180,4 +155,35 @@ std::vector<std::string> Crawler::extract_a_tag(tree<HTML::Node>& dom) {
         }
     }
     return links;
+}
+
+Url Crawler::parse_url_string(
+        std::string urlstr, const std::string& current_base_url) {
+    Url new_url;
+    std::regex regexp("//.+?[^/:](?=[?/]|$)");
+    std::smatch match;
+    std::regex_search(urlstr, match, regexp);
+
+    if (match.empty()) {
+        // Relative URL
+        if (urlstr[0] != '/') {
+            // insert '/' if not already there
+            urlstr.insert(0, "/");
+        }
+        new_url.base = current_base_url;
+        new_url.path = urlstr;
+    } else {
+        // Full URL
+        // First 2 characters are "//", need to be removed from base url
+        new_url.base = match.str().substr(2);
+
+        // Extract path from URL
+        int offset = urlstr.find(new_url.base) + new_url.base.size();
+        new_url.path = urlstr.substr(offset);
+
+        if (new_url.path.empty()) {
+            new_url.path = "/";
+        }
+    }
+    return new_url;
 }
