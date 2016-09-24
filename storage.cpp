@@ -31,23 +31,23 @@ void Storage::add_urls(std::vector<Url>& urls){
 }
 
 void Storage::add_urls(std::vector<std::string>& urlstrs) {
-    std::lock_guard<std::mutex> lock1(q_lock);
-    std::lock_guard<std::mutex> lock2(blacklist_lock);
     for (auto url = urlstrs.begin(); url != urlstrs.end(); ++url) {
-        url_blacklist.insert(*url);
         Url url_struct = { .base = *url, .path = "/" };
-        to_visit_q.push_back(url_struct);
+        add_url(url_struct);
     }
 }
 
 Url Storage::get_next_url() {
     std::lock_guard<std::mutex> lock(q_lock);
+    // TODO: handle case when we ran out of URL (unlikely, unless adversarial
+    // input given)
     Url next = to_visit_q.front();
     to_visit_q.pop_front();
     return next;
 }
 
 void Storage::dump_log() {
+    std::lock_guard<std::mutex> lock(url_log_lock);
     std::ofstream fs;
     fs.open("output/url_log.txt");
     for (auto log_entry = url_log.begin(); log_entry != url_log.end();
