@@ -1,6 +1,7 @@
 // @author: Diga Widyaprana
 // @matric: A0114171W
 
+#include <csignal>
 #include <fstream>
 #include <iostream>
 #include <thread>
@@ -10,6 +11,13 @@
 
 Storage store;
 
+void sigint_handler(int signum) {
+    std::cout << "Sigint " << signum << " received." << std::endl;
+    std::cout << "Dump log to output/url_log.txt." << std::endl;
+    store.dump_log();
+    exit(signum);
+}
+
 void create_and_run_crawler(Storage& store) {
     Crawler crawler(store);
     crawler.run();
@@ -17,6 +25,7 @@ void create_and_run_crawler(Storage& store) {
 
 int main(int argc, char const *argv[])
 {
+    std::signal(SIGINT, sigint_handler); // register ctrl-c interrupt handler
     std::string seed = "seed";
     if (argc > 1) {
         seed = argv[1];
@@ -31,9 +40,10 @@ int main(int argc, char const *argv[])
 
     store.add_urls(urls);
 
+    // Determine the number of threads to spawn, between 4-8
     int n = std::thread::hardware_concurrency();
     std::cout << n << std::endl;
-    n = n < 4 ? 4 : n;
+    n = std::min(std::max(n, 4), 8);
 
     std::thread t(create_and_run_crawler, std::ref(store));
 
@@ -48,6 +58,5 @@ int main(int argc, char const *argv[])
 
     // TODO: think of a termination condition! :/
     t.join();
-    store.dump_log();
     return 0;
 }
