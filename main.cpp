@@ -4,6 +4,7 @@
 #include <csignal>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <thread>
 
 #include "crawler.h"
@@ -49,23 +50,24 @@ int main(int argc, char const *argv[]) {
     n = std::min(std::max(n, 4), 8);
     std::cout << "Threads to be used: " << n << std::endl;
 
-    std::thread t(create_and_run_crawler, std::ref(store));
+    std::vector<std::shared_ptr<std::thread>> threads;
 
-    // 1 is already created above
-    for (int i = 1; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         try {
-            std::thread td(create_and_run_crawler, std::ref(store));
-            td.detach();
+            auto td = std::make_shared<std::thread>(create_and_run_crawler,
+                                                    std::ref(store));
+            threads.push_back(td);
         } catch(std::system_error& e) {
             perror("thread");
         }
     }
 
     // TODO: think of a termination condition! :/
-    t.join();
+    for (auto t_ptr = threads.begin(); t_ptr != threads.end(); ++t_ptr) {
+        (*t_ptr)->join();
+    }
 
-    // DEBUG
-    std::cout << "Here";
+    std::cout << "Ran out of URLs to visit. Dump URLs to url_log.txt.\n";
     store.dump_log();
     return 0;
 }
