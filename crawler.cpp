@@ -115,8 +115,8 @@ std::string Crawler::construct_req_header(
     std::ostringstream oss;
     oss << "GET " << path << " HTTP/1.0\r\n";
     oss << "Host: " << host << "\r\n";
-    oss << "Accept: */*" << "\r\n\r\n";
-    // oss << "Connection: close" << "\r\n" << "\r\n";
+    oss << "Accept: */*\r\n";
+    oss << "User-Agent: digaw@u.nus.edu\r\n\r\n";
     return oss.str();
 }
 
