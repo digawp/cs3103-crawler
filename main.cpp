@@ -63,5 +63,6 @@ int main(int argc, char const *argv[]) {
 
     // TODO: think of a termination condition! :/
     t.join();
+    store.dump_log();
     return 0;
 }
