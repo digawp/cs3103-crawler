@@ -10,6 +10,7 @@ typedef struct Url Url;
 
 void Storage::report_res_time(const std::string& base_url, const double time) {
     std::lock_guard<std::mutex> lock(url_log_lock);
+    // Increment the response time and the visit count
     url_log[base_url].time += time;
     url_log[base_url].visited++;
 }
@@ -27,12 +28,6 @@ void Storage::add_url(Url url){
     }
 }
 
-void Storage::add_urls(std::vector<Url>& urls){
-    for (auto url = urls.begin(); url != urls.end(); ++url) {
-        add_url(*url);
-    }
-}
-
 void Storage::add_urls(std::vector<std::string>& urlstrs) {
     for (auto url = urlstrs.begin(); url != urlstrs.end(); ++url) {
         Url url_struct = { .base = *url, .path = "/" };
@@ -42,9 +37,9 @@ void Storage::add_urls(std::vector<std::string>& urlstrs) {
 
 Url Storage::get_next_url() {
     std::lock_guard<std::mutex> lock(q_lock);
-    // TODO: handle case when we ran out of URL
     Url next;
     if (to_visit_q.empty()) {
+        // If ran out of URL, return an empty URL
         return next;
     }
     next = to_visit_q.front();

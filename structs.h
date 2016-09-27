@@ -4,6 +4,10 @@
 #ifndef STRUCTS_H_
 #define STRUCTS_H_
 
+/**
+ * @brief      A struct representing a URL.
+ * One can retrieve the base URL, the path, and the full URL from the struct.
+ */
 struct Url {
     std::string base;
     std::string path;

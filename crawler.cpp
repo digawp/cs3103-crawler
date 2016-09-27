@@ -18,18 +18,22 @@ void Crawler::run() {
     while (true) {
         Url url = storage.get_next_url();
 
-        if (url.full().empty()) return; // ran out of URLs to visit
+        // Terminate if we ran out of URLs to visit
+        if (url.full().empty()) return;
 
         int socket_desc;
         struct addrinfo* addrinfo_res;
 
+        // Resolve the URL to its IP Address
         int addrinfo_status =
             getaddrinfo(url.base.c_str(), "http", NULL, &addrinfo_res);
         if (addrinfo_status != 0) {
+            // Error when getting address info.
             perror(gai_strerror(addrinfo_status));
             continue;
         }
 
+        // Attempt to connect to the server
         bool connect_success = connect(addrinfo_res, &socket_desc);
         if (!connect_success) {
             perror("Cannot connect to any of the results");
@@ -37,13 +41,17 @@ void Crawler::run() {
         }
         freeaddrinfo(addrinfo_res);
 
+        // Construct the request header and send it over
         std::string request = construct_req_header(url.base, url.path);
         send(socket_desc, request.c_str(), request.size(), 0);
 
+        // Measure the response time
         auto start = std::chrono::steady_clock::now();
+        // Check if response has arrived, but don't retrieve it first
         recv(socket_desc, NULL, 0, MSG_PEEK);
         auto end = std::chrono::steady_clock::now();
 
+        // Process the response
         char buffer[1024];
         int bytes_read;
         std::stringstream ss;
@@ -53,20 +61,24 @@ void Crawler::run() {
 
         // In case the response terminated early
         if (bytes_read == -1) {
-            perror("recv");
+            perror("Error when receiving response.");
             continue;
         }
 
+        // Parse the response into header and body so that the body can be
+        // passed to the HTML parser
         HttpResponse response = parse_response(ss);
 
         HTML::ParserDom parser;
         tree<HTML::Node> dom = parser.parseTree(response.body);
         std::vector<std::string> links = extract_a_tag(dom);
 
+        // Add all found URLs from the <a> tag into the storage.
         for (auto link = links.begin(); link != links.end(); ++link) {
             storage.add_url(parse_url_string(*link, url.base));
         }
 
+        // Report the response time of the recently visited URL.
         std::chrono::microseconds duration =
             std::chrono::duration_cast<std::chrono::microseconds>(end - start);
         double elapsed = duration.count()/1000.0;
@@ -80,6 +92,7 @@ void Crawler::run() {
 }
 
 bool Crawler::connect(struct addrinfo* ai_results, int* socket_desc) {
+    // Result pointer
     struct addrinfo* rp;
 
     for (rp = ai_results; rp != NULL; rp = rp->ai_next) {
@@ -89,7 +102,7 @@ bool Crawler::connect(struct addrinfo* ai_results, int* socket_desc) {
         *socket_desc =
             socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (*socket_desc == -1) {
-            perror("client: socket");
+            perror("Error when opening a socket.");
             continue;
         }
 
@@ -97,14 +110,14 @@ bool Crawler::connect(struct addrinfo* ai_results, int* socket_desc) {
             ::connect(*socket_desc, rp->ai_addr, rp->ai_addrlen);
         if (connect_status < 0) {
             close(*socket_desc);
-            perror("client: connect");
+            perror("Error when trying to connect.");
             continue;
         }
         break; // connect successful
     }
 
     if (rp == NULL) {
-        // ran out of rp
+        // Ran out of ai_results, means failed to connect.
         return false;
     }
     return true;
@@ -127,16 +140,22 @@ Crawler::HttpResponse Crawler::parse_response(std::stringstream& ss) {
 
     for (std::string line; std::getline(ss, line); ) {
         if (line.size() < 2) {
+            // The blank line between header and body. Means we have reached the
+            // end of the response header.
             break;
         }
+        // Get line ignores the newline character.
         header += line + "\n";
     }
     res.header = header;
 
     for (std::string line; std::getline(ss, line); ) {
         if (line.size() < 2) {
+            // Ignore the first blank line which is the boundary between header
+            // and body.
             continue;
         }
+        // Get line ignores the newline character.
         body += line + "\n";
     }
     res.body = body;
@@ -159,12 +178,13 @@ std::vector<std::string> Crawler::extract_a_tag(tree<HTML::Node>& dom) {
 Url Crawler::parse_url_string(
         std::string urlstr, const std::string& current_base_url) {
     Url new_url;
+    // Matches "//www.example.com"
     std::regex regexp("//.+?[^/:](?=[?/]|$)");
     std::smatch match;
     std::regex_search(urlstr, match, regexp);
 
     if (match.empty()) {
-        // Relative URL
+        // If no match means it's a relative URL
         if (urlstr[0] != '/') {
             // insert '/' if not already there
             urlstr.insert(0, "/");
@@ -173,7 +193,7 @@ Url Crawler::parse_url_string(
         new_url.path = urlstr;
     } else {
         // Full URL
-        // First 2 characters are "//", need to be removed from base url
+        // First 2 characters are "//", need to be removed
         new_url.base = match.str().substr(2);
 
         // Extract path from URL
