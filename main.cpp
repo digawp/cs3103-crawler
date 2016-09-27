@@ -63,6 +63,9 @@ int main(int argc, char const *argv[]) {
 
     // TODO: think of a termination condition! :/
     t.join();
+
+    // DEBUG
+    std::cout << "Here";
     store.dump_log();
     return 0;
 }

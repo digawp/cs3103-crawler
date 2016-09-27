@@ -42,9 +42,12 @@ void Storage::add_urls(std::vector<std::string>& urlstrs) {
 
 Url Storage::get_next_url() {
     std::lock_guard<std::mutex> lock(q_lock);
-    // TODO: handle case when we ran out of URL (unlikely, unless adversarial
-    // input given)
-    Url next = to_visit_q.front();
+    // TODO: handle case when we ran out of URL
+    Url next;
+    if (to_visit_q.empty()) {
+        return next;
+    }
+    next = to_visit_q.front();
     to_visit_q.pop_front();
     return next;
 }

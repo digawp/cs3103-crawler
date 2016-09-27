@@ -17,6 +17,9 @@ Crawler::Crawler(Storage& store) : storage(store) {}
 void Crawler::run() {
     while (true) {
         Url url = storage.get_next_url();
+
+        if (url.full().empty()) return; // ran out of URLs to visit
+
         int socket_desc;
         struct addrinfo* addrinfo_res;
 
