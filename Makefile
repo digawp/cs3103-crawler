@@ -1,16 +1,16 @@
 default: build
 
-build: main.cpp crawler.cpp storage.cpp
+build: main.cpp build/crawler.o build/storage.o
 	mkdir -p build
-	g++ -std=c++11 main.cpp crawler.cpp storage.cpp -o build/crawl -lhtmlcxx -lpthread
+	g++ -std=c++11 main.cpp build/crawler.o build/storage.o -o build/crawl -lhtmlcxx -lpthread
 
 run: build/crawl
-	./build/crawl $(SEED)
+	./build/crawl $(SEED) $(LIMIT)
 
-crawler: crawler.cpp crawler.h
+build/crawler.o: crawler.cpp crawler.h
 	g++ -std=c++11 -c crawler.cpp -o build/crawler.o
 
-storage: storage.cpp storage.h
+build/storage.o: storage.cpp storage.h
 	g++ -std=c++11 -c storage.cpp -o build/storage.o
 
 mockbuild: mockmain.cpp

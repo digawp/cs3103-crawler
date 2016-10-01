@@ -36,9 +36,17 @@ Make sure you have all the prerequisites above before running the following.
 
 ## Running
 
-    make run [SEED=<path/to/seed>]
+    make run [SEED=<path/to/seed> | LIMIT=<url log limit>]
 
-If left empty, the default `seed` file will be used.
+If `SEED` left empty, the default `seed` file will be used.
+If `LIMIT` left empty, the default `LIMIT` is 30.
+The two arguments are optional.
+
+Alternatively, run the executable generated under `build/` directory.
+
+    <path/to/program> [<path/to/seed> | <url log limit>]
+
+Same as its `make` counterpart, the arguments are optional and the order does not matter. Integers will be assumed as `url log limit`, otherwise it is assumed as `path/to/seed`.
 
 ## Testing a seed URL
 
