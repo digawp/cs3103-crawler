@@ -2,6 +2,16 @@
 
 A web crawler written as part of CS3103 Computer Networks Practices assignment in National University of Singapore.
 
+The crawler can run in parallel; 4-8 threads, depending on hardware concurrency supported. All the threads share a common storage to store URLs visited and retrieve URLs to be visited, to prevent the crawler to visit a page that has been visited before by any of the crawlers (assignment requirement).
+
+The web crawler aims to go for breadth rather than depth. It will only visit sites from the same domain at most 20 times. The number of domains to visit can be customized, default to 30. The seed websites can also be customized.
+
+See Running for more details on how to run and customize the crawler parameters.
+
+You can terminate the crawler anytime by giving interrupt signal (eg ctrl-c).
+
+The crawler does not parse HTTP response status, it will just check the body of the response and retrieve all the links inside an `<a>` tag. There is no special handling since for most HTTP error response, there is nothing the crawler can do anyway.
+
 ## Prerequisites
 
 ### htmlcxx
