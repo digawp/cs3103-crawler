@@ -11,6 +11,7 @@
 #include "storage.h"
 
 Storage store;
+std::string seed_file_name = "seed";
 
 /**
  * @brief      Handles interrupt signal. Dump the URLs visited and exit the
@@ -22,7 +23,7 @@ void sigint_handler(int signum) {
     std::cout << "\nSigint " << signum << " received." << std::endl;
     std::cout << "Dump URLs to url_log.txt." << std::endl;
     store.dump_log();
-    exit(signum);
+    exit(0);
 }
 
 /**
@@ -36,19 +37,38 @@ void create_and_run_crawler(Storage& store) {
     crawler.run();
 }
 
+void parse_options(int argc, char const *argv[]) {
+    if (argc == 1) {
+        return; // nothing to set
+    }
+    if (argc > 3) {
+        std::cout << "Usage: <program-name> [<seed file name> | <url log limit>]" << std::endl;
+        std::cout << "Integers will be assumed as url log limit." << std::endl;
+        std::cout << "Other than that it will be assumed as seed file name." << std::endl;
+        std::cout << "If multiple integers or non-integers is given, only the last ones are used." << std::endl;
+    }
+    for (int i = 1; i < argc; ++i) {
+        if (atoi(argv[i])) {
+            store.set_url_limit(atoi(argv[i]));
+        } else {
+            seed_file_name = argv[i];
+        }
+    }
+}
+
 int main(int argc, char const *argv[]) {
     // Register interrupt handler (eg ctrl-c)
     std::signal(SIGINT, sigint_handler);
 
-    std::cout << "Crawling with seed URLs from " << seed << std::endl;
+    // This will set the @code {seed_file_name} and @code {store}'s log limit
+    parse_options(argc, argv);
+
+    std::cout << "Crawling with seed URLs from " << seed_file_name << std::endl;
+    std::cout << "Will stop when " << store.get_url_limit() << " domains visited." << std::endl;
     std::cout << "Press Ctrl+c to terminate." << std::endl;
 
     // Read the seed file to be used as the seed URLs for the crawlers.
-    std::string seed = "seed";
-    if (argc > 1) {
-        seed = argv[1];
-    }
-    std::ifstream seed_file(seed);
+    std::ifstream seed_file(seed_file_name);
     std::vector<std::string> urls;
     for (std::string line; std::getline(seed_file, line); ) {
         urls.push_back(line);

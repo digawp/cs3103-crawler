@@ -29,6 +29,12 @@ private:
     std::mutex blacklist_lock;
     std::mutex q_lock;
 
+    // The limit to the number of domains in the log.
+    unsigned int log_limit = 30;
+
+    // Count of number of domains visited.
+    unsigned int visited_count = 0;
+
     /**
      * The list of base URLs (domains) visited and its response time, and other auxiliary data.
      */
@@ -45,6 +51,10 @@ private:
     std::deque<struct Url> to_visit_q;
 
 public:
+    void set_url_limit(const unsigned int limit);
+
+    unsigned int get_url_limit();
+
     /**
      * @brief      API for crawlers to report response time of a domain.
      *             The unit of time is milliseconds.
