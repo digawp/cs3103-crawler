@@ -38,7 +38,7 @@ void Storage::add_url(Url url){
         url_blacklist.insert(url.full());
         to_visit_q.push_back(url);
     }
-    if (visited_count >= 30) {
+    if (visited_count >= log_limit) {
         // Terminate when certain certain number of domains visited
         std::raise(SIGINT);
     }
